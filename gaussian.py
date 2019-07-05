@@ -1,4 +1,5 @@
 # simple script to fit a Gaussian to fake data
+###editing to test 
 
 from scipy.optimize import curve_fit
 import numpy as np
