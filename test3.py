@@ -72,8 +72,8 @@ if __name__ == '__main__':
         ## highlight promising ones
         ## radius filter 10 solar mass
         ## plt.savefig('test.png') 
-        if kicid != 2013883:
-            continue
+        #if kicid != 2013883:
+        #    continue
         kicrow = list(kicidlistuf).index(kicid) # get row value where particular kicid valid
         #print(kicrow)
         teff = gaiad[kicrow,1]
