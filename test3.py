@@ -98,7 +98,7 @@ if __name__ == '__main__':
                 qual.append(hdu_data["sap_quality"])
         # convert to simple arrays
 
-        pdb.set_trace()
+        #pdb.set_trace() ### error st
         time=time[0]
         flux=flux[0]
         qual=qual[0]
@@ -130,7 +130,10 @@ if __name__ == '__main__':
         tsun = 5778 #K
         vmax = (m_ms*((teff/tsun)**3.5)*vmaxs)/((rad**2)*((teff/tsun)**4))
         width= (1/(0.1*vmax*(10**(-6))))/86400
-        print(width,teff,rad,vmax)
+        print("width=",width,"days \n"
+              "teff=",teff,"K \n"
+              "radius=",rad,"R_sun", "\n"
+              "nu_max=",vmax,"microHz")
 # plt.title 
 #plt.title('some text') 
 #plt.title(str(numax))
