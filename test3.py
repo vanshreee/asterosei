@@ -97,8 +97,9 @@ if __name__ == '__main__':
                 flux.append(hdu_data["pdcsap_flux"])
                 qual.append(hdu_data["sap_quality"])
         # convert to simple arrays
-
-        #pdb.set_trace() ### error st
+## print lcs and check if it has anything. if it doesnt, skip that star.
+        #pdb.set_trace()
+        ### error st ## mayb not finding sdata for star.
         time=time[0]
         flux=flux[0]
         qual=qual[0]
@@ -187,7 +188,7 @@ if __name__ == '__main__':
         plt.axvline(x=vmax,linewidth=2, color='r')
         plt.xlabel('Frequency ($\mu$Hz)')
         plt.ylabel('Power Density')
-        plt.xlim([10,8000])
+        plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax])
         plt.tight_layout()
 
 
@@ -208,4 +209,8 @@ if __name__ == '__main__':
 
         ### sap flux : aperture added flux
         ###pdc flux has corrections by kepler team
+
+
+        ## rotating star having asteroseismic detection really valuable. Sending 2 catalogs with rotation periods## skip the ones with asteroseismic detection and prioriitize those with a rotation period ## make sample manageable. From those, look at high probablity stars.
+        # keep the code as you have, download the catalogs.. if my star in this catalog, skip it etc.. bunch of if statement s to implement that. 
         
