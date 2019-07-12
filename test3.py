@@ -30,8 +30,17 @@ def sigclip(x,y,subs,sig):
 if __name__ == '__main__':
     
 #load gaia data
+#
     gaiad = np.loadtxt('./observed_sc_targets_Q0-Q17_prob_gaia.txt',skiprows=1)
-
+    
+#load rotation period data : Table 1 of http://vizier.u-strasbg.fr/viz-bin/VizieR?-source=J/ApJS/211/24
+#
+    gyrkics = np.loadtxt('./keepthese.txt',skiprows=1)#kicids with rot periods
+    
+#load prev measured asteroseismic detections. : Spec table of http://vizier.u-strasbg.fr/viz-bin/VizieR?-source=J/ApJS/210/1
+#
+    prevkics = np.loadtxt('./ignorethese.txt',skiprows=1)#kicids with rot periods
+    
     kicidlistuf = gaiad[:,0]
     problistuf = gaiad[:,5]
     tlengthlistuf = gaiad[:,4] #unit is days
