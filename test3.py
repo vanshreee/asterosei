@@ -9,6 +9,12 @@ from astropy.convolution import convolve, Gaussian1DKernel, Box1DKernel
 from astropy.stats import LombScargle
 from scipy.signal import savgol_filter as savgol
 
+# Want to debug? Use pdb.set_trace() 
+
+#Action Items:
+        ## highlight and save promising detections
+        ## Display kicid and numax on top 
+
 # subroutine to perform rough sigma clipping
 def sigclip(x,y,subs,sig):
     keep = np.zeros_like(x)
@@ -34,7 +40,7 @@ if __name__ == '__main__':
 #load rotation period data : Table 1 of http://vizier.u-strasbg.fr/viz-bin/VizieR?-source=J/ApJS/211/24
     keepkics = np.loadtxt('./keepgyr.txt',skiprows=1) #kicids with rot periods # only one col so no need to sep into cols
     
-#load prev measured asteroseismic detections. : Spec table of http://vizier.u-strasbg.fr/viz-bin/VizieR?-source=J/ApJS/210/1
+#load prev measured asteroseismic detections. : Table 1 of http://vizier.u-strasbg.fr/viz-bin/VizieR?-source=J/ApJS/210/1
     ignorekics = np.loadtxt('./ignoreprev.txt',skiprows=1)#kicids with prev periods astero detections
     
     kicidlistuf = gaiad[:,0]
@@ -52,31 +58,31 @@ if __name__ == '__main__':
     kepmaglist = np.array([])
 
     for i in range(0,len(kicidlistuf)):
-        if (problistuf[i] <= 0.89): # selecting *s with prob of astero detection > 0.89
+        if (problistuf[i] <= 0.89): # selecting *s with prob of asteroseismic detection > 0.89
             continue
         if (tlengthlistuf[i] != 30):# selecting *s with 30 day long exposures
             continue
-        if (radlistuf[i] > 10): # selecting *s with radii<10*solar radius
+        if (radlistuf[i] > 10): # selecting *s smaller than 10*solar radius
             continue
+        
         igkic = np.where(ignorekics==kicidlistuf[i])[0]
         kekic = np.where(keepkics==kicidlistuf[i])[0]
-        #pdb.set_trace()
-        if (len(igkic)==1):
+        
+        if (len(igkic)==1): # selecting *s that do not have previously detected asteroseismic measurements
             continue
-        if (len(kekic)==0):
+        if (len(kekic)==0): # selecting *s that have a rotation period 
             continue
+        
         kicid = kicidlistuf[i]
         prob = problistuf[i]
         tlength = tlengthlistuf[i]
-        kicrow = list(kicidlistuf).index(kicid)
-        # get row value where particular kicid valid
-        ### display the roation period and see if this works. 
-        #print(kicrow)
+        kicrow = list(kicidlistuf).index(kicid) # get row value where particular kicid valid
+        
         teff = gaiad[kicrow,1]
         rad = gaiad[kicrow,2]
         kepmag = gaiad[kicrow,3]
 
-        kicidlist = np.append(kicidlist,kicid)
+        kicidlist = np.append(kicidlist,kicid) # append to create a list
         tlengthlist = np.append(tlengthlist,tlength)
         problist = np.append(problist,prob)
         tefflist = np.append(tefflist,teff)
@@ -84,13 +90,7 @@ if __name__ == '__main__':
         kepmaglist = np.append(kepmaglist,kepmag)
 
     for kicid in kicidlist:
-        ## highlight promising ones
-        ## radius filter 10 solar mass
-        ## plt.savefig('test.png') 
-        #if kicid != 2013883:
-        #    continue
         kicrow = list(kicidlistuf).index(kicid) # get row value where particular kicid valid
-        #print(kicrow)
         teff = gaiad[kicrow,1]
         rad = gaiad[kicrow,2]
         kepmag = gaiad[kicrow,3]
@@ -206,24 +206,20 @@ if __name__ == '__main__':
         plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax])
         plt.tight_layout()
 
-
-        # plot the power spectrum regular
+            # plot the power spectrum regular
         plt.subplot(3,2,6)
-        plt.plot(freq,amp) ####### change x range to vmax + 0.5 vmax
+        plt.plot(freq,amp) 
         plt.plot(freq,pssm)
         plt.axvline(x=vmax,linewidth=2, color='r')
         plt.xlabel('Frequency ($\mu$Hz)')
         plt.ylabel('Power Density')
-        plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax])
+        plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax]) # x range goes to vmax +- 0.5 vmax
         plt.tight_layout()
 
         # save the output as png
         plt.savefig('fig.png',dpi=200)
 
         input(':')
-
-        ### sap flux : aperture added flux
-        ###pdc flux has corrections by kepler team
 
 
         
