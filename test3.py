@@ -12,7 +12,6 @@ from scipy.signal import savgol_filter as savgol
 # subroutine to perform rough sigma clipping
 def sigclip(x,y,subs,sig):
     keep = np.zeros_like(x)
-    #pdb.set_trace()
     start=0
     end=subs
     nsubs=int((len(x)/subs)+1)
@@ -30,16 +29,13 @@ def sigclip(x,y,subs,sig):
 if __name__ == '__main__':
     
 #load gaia data
-#
     gaiad = np.loadtxt('./observed_sc_targets_Q0-Q17_prob_gaia.txt',skiprows=1)
     
 #load rotation period data : Table 1 of http://vizier.u-strasbg.fr/viz-bin/VizieR?-source=J/ApJS/211/24
-#
-    gyrkics = np.loadtxt('./keepthese.txt',skiprows=1)#kicids with rot periods
+    keepkics = np.loadtxt('./keepgyr.txt',skiprows=1) #kicids with rot periods # only one col so no need to sep into cols
     
 #load prev measured asteroseismic detections. : Spec table of http://vizier.u-strasbg.fr/viz-bin/VizieR?-source=J/ApJS/210/1
-#
-    prevkics = np.loadtxt('./ignorethese.txt',skiprows=1)#kicids with rot periods
+    ignorekics = np.loadtxt('./ignoreprev.txt',skiprows=1)#kicids with prev periods astero detections
     
     kicidlistuf = gaiad[:,0]
     problistuf = gaiad[:,5]
@@ -55,28 +51,38 @@ if __name__ == '__main__':
     radlist = np.array([])
     kepmaglist = np.array([])
 
-    
-
     for i in range(0,len(kicidlistuf)):
-        if (problistuf[i] > 0.89):
-            if (tlengthlistuf[i] == 30):
-                kicid = kicidlistuf[i]
-                prob = problistuf[i]
-                tlength = tlengthlistuf[i]
-                kicrow = list(kicidlistuf).index(kicid) # get row value where particular kicid valid
-                #print(kicrow)
-                teff = gaiad[kicrow,1]
-                rad = gaiad[kicrow,2]
-                kepmag = gaiad[kicrow,3]
-                
+        if (problistuf[i] <= 0.89): # selecting *s with prob of astero detection > 0.89
+            continue
+        if (tlengthlistuf[i] != 30):# selecting *s with 30 day long exposures
+            continue
+        if (radlistuf[i] > 10): # selecting *s with radii<10*solar radius
+            continue
+        igkic = np.where(ignorekics==kicidlistuf[i])[0]
+        kekic = np.where(keepkics==kicidlistuf[i])[0]
+        #pdb.set_trace()
+        if (len(igkic)==1):
+            continue
+        if (len(kekic)==0):
+            continue
+        kicid = kicidlistuf[i]
+        prob = problistuf[i]
+        tlength = tlengthlistuf[i]
+        kicrow = list(kicidlistuf).index(kicid)
+        # get row value where particular kicid valid
+        ### display the roation period and see if this works. 
+        #print(kicrow)
+        teff = gaiad[kicrow,1]
+        rad = gaiad[kicrow,2]
+        kepmag = gaiad[kicrow,3]
 
-                kicidlist = np.append(kicidlist,kicid)
-                tlengthlist = np.append(tlengthlist,tlength)
-                problist = np.append(problist,prob)
-                tefflist = np.append(tefflist,teff)
-                radlist = np.append(radlist,rad)
-                kepmaglist = np.append(kepmaglist,kepmag)
-                
+        kicidlist = np.append(kicidlist,kicid)
+        tlengthlist = np.append(tlengthlist,tlength)
+        problist = np.append(problist,prob)
+        tefflist = np.append(tefflist,teff)
+        radlist = np.append(radlist,rad)
+        kepmaglist = np.append(kepmaglist,kepmag)
+
     for kicid in kicidlist:
         ## highlight promising ones
         ## radius filter 10 solar mass
@@ -92,7 +98,8 @@ if __name__ == '__main__':
         client = kplr.API()
         star = client.star(kicid)
         lcs = star.get_light_curves(short_cadence=True)
-
+        if (len(lcs)==0):
+            continue
         time, flux, qual = [], [], []
         for lc in lcs:
             # if data is long-cadence, skip this entry
@@ -106,9 +113,9 @@ if __name__ == '__main__':
                 flux.append(hdu_data["pdcsap_flux"])
                 qual.append(hdu_data["sap_quality"])
         # convert to simple arrays
-## print lcs and check if it has anything. if it doesnt, skip that star.
-        #pdb.set_trace()
         ### error st ## mayb not finding sdata for star.
+        if (time==[]):
+            continue
         time=time[0]
         flux=flux[0]
         qual=qual[0]
@@ -133,7 +140,6 @@ if __name__ == '__main__':
         flux=flux[good]
         plt.plot(time,flux)
 ####################################################
-##### limit on star radius.. < 10 solar rad
 ##### shift for a certain star flux 
         m_ms=1.2 #m/msun = 1.2
         vmaxs = 3100 #microHz
@@ -220,6 +226,4 @@ if __name__ == '__main__':
         ###pdc flux has corrections by kepler team
 
 
-        ## rotating star having asteroseismic detection really valuable. Sending 2 catalogs with rotation periods## skip the ones with asteroseismic detection and prioriitize those with a rotation period ## make sample manageable. From those, look at high probablity stars.
-        # keep the code as you have, download the catalogs.. if my star in this catalog, skip it etc.. bunch of if statement s to implement that. 
         
