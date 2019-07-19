@@ -113,7 +113,6 @@ if __name__ == '__main__':
                 flux.append(hdu_data["pdcsap_flux"])
                 qual.append(hdu_data["sap_quality"])
         # convert to simple arrays
-        ### error st ## mayb not finding sdata for star.
         if (time==[]):
             continue
         time=time[0]
@@ -139,20 +138,24 @@ if __name__ == '__main__':
         time=time[good]
         flux=flux[good]
         plt.plot(time,flux)
+        
 ####################################################
-##### shift for a certain star flux 
+     # plotting
+         # shift for a certain star flux 
         m_ms=1.2 #m/msun = 1.2
         vmaxs = 3100 #microHz
         tsun = 5778 #K
         vmax = (m_ms*((teff/tsun)**3.5)*vmaxs)/((rad**2)*((teff/tsun)**4))
         width= (1/(0.1*vmax*(10**(-6))))/86400
+        
         print("width=",width,"days \n"
               "teff=",teff,"K \n"
               "radius=",rad,"R_sun", "\n"
               "nu_max=",vmax,"microHz")
-# plt.title 
-#plt.title('some text') 
-#plt.title(str(numax))
+
+        #plt.title('some text') 
+        #plt.title(str(numax))
+
             # next, run a filter through the data to remove long-periodic (low frequency) variations
             # let's pick a 5 day width for the filter
 
@@ -163,7 +166,7 @@ if __name__ == '__main__':
             ## if estimated vmax is very low coould be correct
             ## title with estimated vmax
             
-            #
+            
         boxsize= width/(1./60./24.)
         box_kernel = Box1DKernel(boxsize)
         intboxsize = int(boxsize)
@@ -172,6 +175,7 @@ if __name__ == '__main__':
         smoothed_flux = savgol(flux,intboxsize,1,mode='mirror')
             # overplot this smoothed version, and then divide the light curve through it
         plt.plot(time,smoothed_flux)
+        plt.title("kicid is "+ str(int(kicid)) +" and numax is "+ str(round(vmax,1)))
 
         flux=flux/(smoothed_flux)
 
