@@ -175,7 +175,7 @@ if __name__ == '__main__':
         smoothed_flux = savgol(flux,intboxsize,1,mode='mirror')
             # overplot this smoothed version, and then divide the light curve through it
         plt.plot(time,smoothed_flux)
-        plt.title("kicid is "+ str(int(kicid)) +" and numax is "+ str(round(vmax,1)))
+        plt.title("kicid is "+ str(int(kicid)) +" & numax is "+ str(int(vmax)))
 
         flux=flux/(smoothed_flux)
 
