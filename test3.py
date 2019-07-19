@@ -13,7 +13,6 @@ from scipy.signal import savgol_filter as savgol
 
 #Action Items:
         ## highlight and save promising detections
-        ## Display kicid and numax on top 
 
 # subroutine to perform rough sigma clipping
 def sigclip(x,y,subs,sig):
@@ -221,7 +220,7 @@ if __name__ == '__main__':
         plt.tight_layout()
 
         # save the output as png
-        plt.savefig('fig.png',dpi=200)
+        plt.savefig(str(input("Is it good(g) or bad(b)?"))+'_'+str(int(kicid))+'.png',dpi=200)
 
         input(':')
 
