@@ -73,6 +73,12 @@ if __name__ == '__main__':
             continue
         
         kicid = kicidlistuf[i]
+        
+        ## putting in st coz got cut off
+        if (int(kicid)<=12469887):
+            continue
+        ##
+        
         prob = problistuf[i]
         tlength = tlengthlistuf[i]
         kicrow = list(kicidlistuf).index(kicid) # get row value where particular kicid valid
