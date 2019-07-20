@@ -12,8 +12,12 @@ from scipy.signal import savgol_filter as savgol
 # Want to debug? Use pdb.set_trace() 
 
 #Action Items:
-        ## highlight and save promising detections
-
+        ## identify delta v
+        ## tell if it is l=0 etc. 
+        ## make the echelle diagram
+        ## do the asteroseismic age for the star using the small seperations (not vmax)
+        ## look through all again and identify good ones
+        
 # subroutine to perform rough sigma clipping
 def sigclip(x,y,subs,sig):
     keep = np.zeros_like(x)
@@ -75,7 +79,7 @@ if __name__ == '__main__':
         kicid = kicidlistuf[i]
         
         ## putting in st coz got cut off
-        if (int(kicid)<=12469887):
+        if (int(kicid)!=11029516):
             continue
         ##
         
@@ -180,7 +184,7 @@ if __name__ == '__main__':
         smoothed_flux = savgol(flux,intboxsize,1,mode='mirror')
             # overplot this smoothed version, and then divide the light curve through it
         plt.plot(time,smoothed_flux)
-        plt.title("kicid is "+ str(int(kicid)) +" & numax is "+ str(int(vmax)))
+        plt.title("kicid is "+ str(int(kicid)) +" & numax is "+ str(int(vmax))+" $\mu$Hz")
 
         flux=flux/(smoothed_flux)
 
@@ -212,10 +216,11 @@ if __name__ == '__main__':
         plt.axvline(x=vmax,linewidth=2, color='r')
         plt.xlabel('Frequency ($\mu$Hz)')
         plt.ylabel('Power Density')
-        plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax])
+        plt.xlim([100,8000]) ## plot all 10-8000
         plt.tight_layout()
 
-            # plot the power spectrum regular
+        #data artifact 300-400 microhz
+            # plot the power spectrum regular ### low freq no point in plotting. 
         plt.subplot(3,2,6)
         plt.plot(freq,amp) 
         plt.plot(freq,pssm)
