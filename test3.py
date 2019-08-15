@@ -242,42 +242,25 @@ if __name__ == '__main__':
 #_______________________________________________________________________________
 #                             Echelle
 #_______________________________________________________________________________
-        
+   #Generate lightkurve 
        lk = lkk.LightCurve(time=time,flux=flux)
-
+       
+   #Do Fourier transform
        pg = lk.to_periodogram(method='lombscargle',normalization='psd',minimum_frequency=1000,maximum_frequency=3000)
-
+       
+   #Get numax, seis  
        snr = pg.flatten()
        seis = snr.to_seismology()
-
        numax = seis.estimate_numax()
-
-       adelenu=np.float64(0.5)*u.uHz
+       
+   #Change deltanu
+       adelenu=np.float64(input("add or subtract how much?"))*u.uHz
        seis.deltanu=seis.estimate_deltanu()+adelenu
 
+   #Plot Echelle
        seis.plot_echelle(deltanu=seis.deltanu,numax=numax,smooth_filter_width=3.,scale='log',cmap='viridis')
 
-       #trying to use dan hey's
-        ##dnumin=96.83-1
-        ##dnumax=96.83+1
-        ##dnuu=96.83+0.2
-
-        #echelle.interact_echelle(freq,amp,dnumin,dnumax)
-
-        ##echelle.plot_echelle(freq,amp,dnuu) ##danhey's
-        #from echelle import plot_echelle
-        #plot_echelle(freq,lk,deltanu)
-
-
-
-
-
-
-
-
-
-
-input(':')
+      input(':')
 
 ###### meeting notes ##################
         ###
