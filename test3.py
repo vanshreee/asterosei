@@ -8,13 +8,18 @@ import fnmatch
 from astropy.convolution import convolve, Gaussian1DKernel, Box1DKernel
 from astropy.stats import LombScargle
 from scipy.signal import savgol_filter as savgol
+#import echelle #don't need this unless using danhey's 
+from astropy import units as u
+import lightkurve as lkk
 
 # Want to debug? Use pdb.set_trace() 
 
 #Action Items:
-        ## identify delta v
-        ## tell if it is l=0 etc. 
-        ## make the echelle diagram
+        ## identify delta v and make echelle DONE
+        ## plot 1D echelle diagram
+        ## plot on Jen's graphs 
+        ## tell if it is l=0 etc.DOING 
+        ## make the echelle diagram DONE
         ## do the asteroseismic age for the star using the small seperations (not vmax)
         ## look through all again and identify good ones
         
@@ -79,7 +84,7 @@ if __name__ == '__main__':
         kicid = kicidlistuf[i]
         
         ## putting in st coz got cut off
-        if (int(kicid)!=11029516):
+        if (int(kicid)!=11029516): #the vvg one!
             continue
         ##
         
@@ -230,10 +235,83 @@ if __name__ == '__main__':
         plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax]) # x range goes to vmax +- 0.5 vmax
         plt.tight_layout()
 
+## also was just plotting power specturen seperaterly here: 
+        #plt.figure()
+        #plt.plot(time,flux)
+        # plt.plot(freq,pssm)     
+        # plt.axvline(x=vmax,linewidth=2, color='r')
+        # plt.xlabel('Frequency ($\mu$Hz)') 
+        # plt.ylabel('Power Density')
+        # plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax])
+        # x range goes to vmax +- 0.5 vmaxm
+
+       import warnings
+        warnings.filterwarnings('ignore')
+        import lightkurve as lkk
+
+    #Getting Data from MAST
+        datalist = lkk.search_lightcurvefile('KIC11029516',  cadence='short')
+        data = datalist[:].download_all()
+        lk = data.stitch
+
+    #Plot Normalized flux over Time
+        lk=lk().normalize().remove_outliers().remove_nans()
+        #lk.plot();
+
+    #Plot Fourier transform with smoothened one &numax
+        pg = lk.to_periodogram(method='lombscargle',normalization='psd',minimum_frequency=1000,maximum_frequency=3000)
+        #ax = pg.plot()
+        #ax.axvline(pg.frequency_at_max_power.value,lw=5,ls='-.')
+
+        #pg.smooth(method= 'boxkernel', filter_width=1.).plot(ax=ax,label='Smoothed',c='red',lw=2)
+        #pg.plot(scale = 'log')
+        #pg.show_properties()
+
+    #Plot Signal-to-Noise and use seismology module
+        snr = pg.flatten()
+        #snr.plot()
+        seis = snr.to_seismology()
+        #seis
+        #seis.periodogram.plot()
+        
+        numax = seis.estimate_numax()
+        #deltanu = seis.estimate_deltanu()
+        #print(np.dtype(deltanu))
+        
+    #Plot that measured deltanu
+        #ax = seis.diagnose_deltanu()
+
+        
         # save the output as png
-        plt.savefig(str(input("Is it good(g) or bad(b)?"))+'_'+str(int(kicid))+'.png',dpi=200)
+        #plt.savefig(str(input("Is it good(g) or bad(b)?"))+'_'+str(int(kicid))+'.png',dpi=200)
 
         input(':')
 
 
+
+###### meeting notes ##################
+        ###
+        # hack the large sep to get a better diag
+        #over sample the power spectrum
+        # make freq grid much smaller
+
+        # find a way to use your power specturm but lk's echelle diag
+        # look through others
+
+        # possibly collaps eon one axis
+        ## do that if not obvious on echelle diagream
+
+        # rough estimate on large sep and put
+        # next week - remind about metallicity bc all plots are assuming some metallicity.
+
+        ## good goal : dv02 spacing and other plot white pper dv02 and and put jen's
+        ## error bar micqillan paper . 
         
+
+        ### tried to show intitiative
+        ### getting upto speed with codings
+        ## read up about the physics behind it 
+        
+        ###good taking notes
+        ###good showing motivations
+        ###good ask qs about the physics behind it
