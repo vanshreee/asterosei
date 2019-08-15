@@ -243,24 +243,24 @@ if __name__ == '__main__':
 #                             Echelle
 #_______________________________________________________________________________
    #Generate lightkurve 
-       lk = lkk.LightCurve(time=time,flux=flux)
+        lk = lkk.LightCurve(time=time,flux=flux)
        
    #Do Fourier transform
-       pg = lk.to_periodogram(method='lombscargle',normalization='psd',minimum_frequency=1000,maximum_frequency=3000)
+        pg = lk.to_periodogram(method='lombscargle',normalization='psd',minimum_frequency=1000,maximum_frequency=3000)
        
    #Get numax, seis  
-       snr = pg.flatten()
-       seis = snr.to_seismology()
-       numax = seis.estimate_numax()
+        snr = pg.flatten()
+        seis = snr.to_seismology()
+        numax = seis.estimate_numax()
        
    #Change deltanu
-       adelenu=np.float64(input("add or subtract how much?"))*u.uHz
-       seis.deltanu=seis.estimate_deltanu()+adelenu
+        adelenu=np.float64(input("add or subtract how much from dnu?"))*u.uHz
+        seis.deltanu=seis.estimate_deltanu()+adelenu
 
    #Plot Echelle
-       seis.plot_echelle(deltanu=seis.deltanu,numax=numax,smooth_filter_width=3.,scale='log',cmap='viridis')
+        seis.plot_echelle(deltanu=seis.deltanu,numax=numax,smooth_filter_width=3.,scale='log',cmap='viridis')
 
-      input(':')
+        input(':')
 
 ###### meeting notes ##################
         ###
