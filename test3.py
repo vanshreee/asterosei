@@ -138,7 +138,7 @@ if __name__ == '__main__':
         flux=flux[good]
 
         # plot the light curve
-        # plt.ion()
+        plt.ion()
         # plt.clf()
         # plt.subplot(3,1,1)
         # plt.plot(time,flux)
@@ -150,7 +150,7 @@ if __name__ == '__main__':
         good = np.where(res == 1)[0]
         time=time[good]
         flux=flux[good]
-        plt.plot(time,flux)
+        #plt.plot(time,flux)
         
 ####################################################
      # plotting
