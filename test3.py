@@ -8,7 +8,6 @@ import fnmatch
 from astropy.convolution import convolve, Gaussian1DKernel, Box1DKernel
 from astropy.stats import LombScargle
 from scipy.signal import savgol_filter as savgol
-#import echelle #don't need this unless using danhey's 
 from astropy import units as u
 import lightkurve as lkk
 
@@ -139,12 +138,12 @@ if __name__ == '__main__':
         flux=flux[good]
 
         # plot the light curve
-        plt.ion()
-        plt.clf()
-        plt.subplot(3,1,1)
-        plt.plot(time,flux)
-        plt.xlabel('Time (Days)')
-        plt.ylabel('Flux (counts)')
+        # plt.ion()
+        # plt.clf()
+        # plt.subplot(3,1,1)
+        # plt.plot(time,flux)
+        # plt.xlabel('Time (Days)')
+        # plt.ylabel('Flux (counts)')
 
         # sigma-clip outliers from the light curve and overplot it
         res=sigclip(time,flux,50,3)
@@ -188,16 +187,16 @@ if __name__ == '__main__':
             intboxsize = intboxsize+1
         smoothed_flux = savgol(flux,intboxsize,1,mode='mirror')
             # overplot this smoothed version, and then divide the light curve through it
-        plt.plot(time,smoothed_flux)
-        plt.title("kicid is "+ str(int(kicid)) +" & numax is "+ str(int(vmax))+" $\mu$Hz")
+        # plt.plot(time,smoothed_flux)
+        # plt.title("kicid is "+ str(int(kicid)) +" & numax is "+ str(int(vmax))+" $\mu$Hz")
 
-        flux=flux/(smoothed_flux)
+        # flux=flux/(smoothed_flux)
 
-            # plot the filtered light curve
-        plt.subplot(3,1,2)
-        plt.plot(time,flux)
-        plt.xlabel('Time (Days)')
-        plt.ylabel('Relative flux')
+        #     # plot the filtered light curve
+        # plt.subplot(3,1,2)
+        # plt.plot(time,flux)
+        # plt.xlabel('Time (Days)')
+        # plt.ylabel('Relative flux')
 
             # now let's calculate the fourier transform. the nyquist frequency is:
         nyq=1./(1./60./24.)
@@ -215,26 +214,26 @@ if __name__ == '__main__':
         pssm = convolve(amp, gauss_kernel)
 
             # plot the power spectrum log scale
-        plt.subplot(3,2,5)
-        plt.loglog(freq,amp)
-        plt.loglog(freq,pssm)
-        plt.axvline(x=vmax,linewidth=2, color='r')
-        plt.xlabel('Frequency ($\mu$Hz)')
-        plt.ylabel('Power Density')
-        plt.xlim([100,8000]) ## plot all 10-8000
-        plt.tight_layout()
+        # plt.subplot(3,2,5)
+        # plt.loglog(freq,amp)
+        # plt.loglog(freq,pssm)
+        # plt.axvline(x=vmax,linewidth=2, color='r')
+        # plt.xlabel('Frequency ($\mu$Hz)')
+        # plt.ylabel('Power Density')
+        # plt.xlim([100,8000]) ## plot all 10-8000
+        # plt.tight_layout()
 
-        #data artifact 300-400 microhz
-            # plot the power spectrum regular ### low freq no point in plotting. 
-        plt.subplot(3,2,6)
-        plt.plot(freq,amp) 
-        plt.plot(freq,pssm)
-        plt.axvline(x=vmax,linewidth=2, color='r')
-        plt.xlabel('Frequency ($\mu$Hz)')
-        plt.ylabel('Power Density')
-        plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax])
+        # #data artifact 300-400 microhz
+        #     # plot the power spectrum regular ### low freq no point in plotting. 
+        # plt.subplot(3,2,6)
+        # plt.plot(freq,amp) 
+        # plt.plot(freq,pssm)
+        # plt.axvline(x=vmax,linewidth=2, color='r')
+        # plt.xlabel('Frequency ($\mu$Hz)')
+        # plt.ylabel('Power Density')
+        # plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax])
         
-        plt.tight_layout()
+        # plt.tight_layout()
         
         # save the output as png
         #plt.savefig(str(input("Is it good(g) or bad(b)?"))+'_'+str(int(kicid))+'.png',dpi=200)
@@ -260,6 +259,8 @@ if __name__ == '__main__':
    #Plot Echelle
         seis.plot_echelle(deltanu=seis.deltanu,numax=numax,smooth_filter_width=3.,scale='log',cmap='viridis')
 
+        plt.savefig('echelle_deltanu_'+str(seis.deltanu)+'_'+str(input("is it good or bad?"))+'.png',dpi=200)
+        
         input(':')
 
 ###### meeting notes ##################
