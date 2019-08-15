@@ -232,62 +232,52 @@ if __name__ == '__main__':
         plt.axvline(x=vmax,linewidth=2, color='r')
         plt.xlabel('Frequency ($\mu$Hz)')
         plt.ylabel('Power Density')
-        plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax]) # x range goes to vmax +- 0.5 vmax
+        plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax])
+        
         plt.tight_layout()
-
-## also was just plotting power specturen seperaterly here: 
-        #plt.figure()
-        #plt.plot(time,flux)
-        # plt.plot(freq,pssm)     
-        # plt.axvline(x=vmax,linewidth=2, color='r')
-        # plt.xlabel('Frequency ($\mu$Hz)') 
-        # plt.ylabel('Power Density')
-        # plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax])
-        # x range goes to vmax +- 0.5 vmaxm
-
-       import warnings
-        warnings.filterwarnings('ignore')
-        import lightkurve as lkk
-
-    #Getting Data from MAST
-        datalist = lkk.search_lightcurvefile('KIC11029516',  cadence='short')
-        data = datalist[:].download_all()
-        lk = data.stitch
-
-    #Plot Normalized flux over Time
-        lk=lk().normalize().remove_outliers().remove_nans()
-        #lk.plot();
-
-    #Plot Fourier transform with smoothened one &numax
-        pg = lk.to_periodogram(method='lombscargle',normalization='psd',minimum_frequency=1000,maximum_frequency=3000)
-        #ax = pg.plot()
-        #ax.axvline(pg.frequency_at_max_power.value,lw=5,ls='-.')
-
-        #pg.smooth(method= 'boxkernel', filter_width=1.).plot(ax=ax,label='Smoothed',c='red',lw=2)
-        #pg.plot(scale = 'log')
-        #pg.show_properties()
-
-    #Plot Signal-to-Noise and use seismology module
-        snr = pg.flatten()
-        #snr.plot()
-        seis = snr.to_seismology()
-        #seis
-        #seis.periodogram.plot()
-        
-        numax = seis.estimate_numax()
-        #deltanu = seis.estimate_deltanu()
-        #print(np.dtype(deltanu))
-        
-    #Plot that measured deltanu
-        #ax = seis.diagnose_deltanu()
-
         
         # save the output as png
         #plt.savefig(str(input("Is it good(g) or bad(b)?"))+'_'+str(int(kicid))+'.png',dpi=200)
 
-        input(':')
+#_______________________________________________________________________________
+#                             Echelle
+#_______________________________________________________________________________
+        
+       lk = lkk.LightCurve(time=time,flux=flux)
+
+       pg = lk.to_periodogram(method='lombscargle',normalization='psd',minimum_frequency=1000,maximum_frequency=3000)
+
+       snr = pg.flatten()
+       seis = snr.to_seismology()
+
+       numax = seis.estimate_numax()
+
+       adelenu=np.float64(0.5)*u.uHz
+       seis.deltanu=seis.estimate_deltanu()+adelenu
+
+       seis.plot_echelle(deltanu=seis.deltanu,numax=numax,smooth_filter_width=3.,scale='log',cmap='viridis')
+
+       #trying to use dan hey's
+        ##dnumin=96.83-1
+        ##dnumax=96.83+1
+        ##dnuu=96.83+0.2
+
+        #echelle.interact_echelle(freq,amp,dnumin,dnumax)
+
+        ##echelle.plot_echelle(freq,amp,dnuu) ##danhey's
+        #from echelle import plot_echelle
+        #plot_echelle(freq,lk,deltanu)
 
 
+
+
+
+
+
+
+
+
+input(':')
 
 ###### meeting notes ##################
         ###
