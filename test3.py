@@ -15,10 +15,12 @@ import lightkurve as lkk
 
 #Action Items:
         ## identify delta v and make echelle DONE
+        ## make echelle better - 
         ## plot 1D echelle diagram
         ## plot on Jen's graphs 
         ## tell if it is l=0 etc.DOING 
         ## make the echelle diagram DONE
+        ## identify peaks (might need to decrease smoothening)
         ## do the asteroseismic age for the star using the small seperations (not vmax)
         ## look through all again and identify good ones
         
@@ -187,12 +189,12 @@ if __name__ == '__main__':
             intboxsize = intboxsize+1
         smoothed_flux = savgol(flux,intboxsize,1,mode='mirror')
             # overplot this smoothed version, and then divide the light curve through it
-        # plt.plot(time,smoothed_flux)
-        # plt.title("kicid is "+ str(int(kicid)) +" & numax is "+ str(int(vmax))+" $\mu$Hz")
+        plt.plot(time,smoothed_flux)
+        plt.title("kicid is "+ str(int(kicid)) +" & numax is "+ str(int(vmax))+" $\mu$Hz")
 
-        # flux=flux/(smoothed_flux)
+        flux=flux/(smoothed_flux)
 
-        #     # plot the filtered light curve
+            # plot the filtered light curve
         # plt.subplot(3,1,2)
         # plt.plot(time,flux)
         # plt.xlabel('Time (Days)')
@@ -213,7 +215,7 @@ if __name__ == '__main__':
         gauss_kernel = Gaussian1DKernel(26)
         pssm = convolve(amp, gauss_kernel)
 
-            # plot the power spectrum log scale
+        #     # plot the power spectrum log scale
         # plt.subplot(3,2,5)
         # plt.loglog(freq,amp)
         # plt.loglog(freq,pssm)
@@ -234,6 +236,15 @@ if __name__ == '__main__':
         # plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax])
         
         # plt.tight_layout()
+
+        # plt.figure()
+        # plt.plot(time,flux)
+        # plt.plot(freq,pssm)     
+        # plt.axvline(x=vmax,linewidth=2, color='r')
+        # plt.xlabel('Frequency ($\mu$Hz)') 
+        # plt.ylabel('Power Density')
+        # plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax])
+        # x range goes to vmax +- 0.5 vmaxm
         
         # save the output as png
         #plt.savefig(str(input("Is it good(g) or bad(b)?"))+'_'+str(int(kicid))+'.png',dpi=200)
@@ -253,13 +264,22 @@ if __name__ == '__main__':
         numax = seis.estimate_numax()
        
    #Change deltanu
-        adelenu=np.float64(input("add or subtract how much from dnu?"))*u.uHz
-        seis.deltanu=seis.estimate_deltanu()+adelenu
+        ##adelenu= np.float64(0.5)*u.uHz #
+        #ax = plt.figure()#.add_suplot(111)
+        for adelenu in np.arange(0.8,1.1,0.02):
+        #adelenu=np.float64(input("add or subtract how much from dnu?"))*u.uHz
+            seis.deltanu=seis.estimate_deltanu()+(adelenu*u.uHz)
+            seis.plot_echelle(deltanu=seis.deltanu,numax=numax,smooth_filter_width=3.,scale='log',cmap='viridis')
+            plt.savefig('finer_straight_echelles'+str(seis.deltanu)+'_'+'.png',dpi=200)
+            #plt.clear()
+            #plt.pause(0.01)
 
    #Plot Echelle
-        seis.plot_echelle(deltanu=seis.deltanu,numax=numax,smooth_filter_width=3.,scale='log',cmap='viridis')
+   #seis.plot_echelle(deltanu=seis.deltanu,numax=numax,smooth_filter_width=3.,scale='log',cmap='viridis')
+        #from pprint import pprint 
+        #pprint(seis)
 
-        plt.savefig('echelle_deltanu_'+str(seis.deltanu)+'_'+str(input("is it good or bad?"))+'.png',dpi=200)
+        
         
         input(':')
 
@@ -289,3 +309,12 @@ if __name__ == '__main__':
         ###good taking notes
         ###good showing motivations
         ###good ask qs about the physics behind it
+
+
+        ## look at power spectrum which peaks are significant
+        ## identify peaks
+        ## decrease smoothening
+        ## echelle flatten get dv02
+
+        # coding questions
+        ## good 
