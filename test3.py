@@ -10,6 +10,8 @@ from astropy.stats import LombScargle
 from scipy.signal import savgol_filter as savgol
 from astropy import units as u
 import lightkurve as lkk
+import matplotlib.lines as mlines
+
 
 # Want to debug? Use pdb.set_trace() 
 
@@ -189,8 +191,8 @@ if __name__ == '__main__':
             intboxsize = intboxsize+1
         smoothed_flux = savgol(flux,intboxsize,1,mode='mirror')
             # overplot this smoothed version, and then divide the light curve through it
-        plt.plot(time,smoothed_flux)
-        plt.title("kicid is "+ str(int(kicid)) +" & numax is "+ str(int(vmax))+" $\mu$Hz")
+        #plt.plot(time,smoothed_flux)
+        #plt.title("kicid is "+ str(int(kicid)) +" & numax is "+ str(int(vmax))+" $\mu$Hz")
 
         flux=flux/(smoothed_flux)
 
@@ -206,7 +208,7 @@ if __name__ == '__main__':
             ## red giant stars long cadence not short cadenc 
 
             # FT magic
-        freq, amp = LombScargle(time,flux).autopower(method='fast',samples_per_peak=10,maximum_frequency=nyq)
+        freq, amp = LombScargle(time,flux).autopower(method='fast',samples_per_peak=50,maximum_frequency=nyq)#10
 
             # unit conversions
         freq = 1000.*freq/86.4
@@ -236,15 +238,6 @@ if __name__ == '__main__':
         # plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax])
         
         # plt.tight_layout()
-
-        # plt.figure()
-        # plt.plot(time,flux)
-        # plt.plot(freq,pssm)     
-        # plt.axvline(x=vmax,linewidth=2, color='r')
-        # plt.xlabel('Frequency ($\mu$Hz)') 
-        # plt.ylabel('Power Density')
-        # plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax])
-        # x range goes to vmax +- 0.5 vmaxm
         
         # save the output as png
         #plt.savefig(str(input("Is it good(g) or bad(b)?"))+'_'+str(int(kicid))+'.png',dpi=200)
@@ -264,22 +257,92 @@ if __name__ == '__main__':
         numax = seis.estimate_numax()
        
    #Change deltanu
-        ##adelenu= np.float64(0.5)*u.uHz #
+        adelenu= np.float64(0.9)#*u.uHz #
         #ax = plt.figure()#.add_suplot(111)
-        for adelenu in np.arange(0.8,1.1,0.02):
+        #for adelenu in np.arange(0.8,1.1,0.02):
         #adelenu=np.float64(input("add or subtract how much from dnu?"))*u.uHz
-            seis.deltanu=seis.estimate_deltanu()+(adelenu*u.uHz)
-            seis.plot_echelle(deltanu=seis.deltanu,numax=numax,smooth_filter_width=3.,scale='log',cmap='viridis')
-            plt.savefig('finer_straight_echelles'+str(seis.deltanu)+'_'+'.png',dpi=200)
+        seis.deltanu=seis.estimate_deltanu()+(adelenu*u.uHz)
+            #seis.plot_echelle(deltanu=seis.deltanu,numax=numax,smooth_filter_width=3.,scale='log',cmap='viridis')
+        #plt.savefig('final_Echelle'+str(seis.deltanu)+'_'+'.png',dpi=200)
             #plt.clear()
             #plt.pause(0.01)
+            
+        ##l=1
+        l1freq =[2418.48,2316.36,2220.47,2122.40,2024.33,1925.68,1829.04,1733.90,1550.97]
+        l1freqmod = l1freq%(seis.deltanu/u.uHz)
+        #print(l1freqmod)
+        
+        ##l=2
+        l2freq = np.array([2264.08,2166.27,2076.13,1971.82,1873.42])
+        l2freqmod = l2freq%(seis.deltanu/u.uHz)
+        #print(l2freqmod)
 
-   #Plot Echelle
+        ##l=0
+        l0freq = np.array([2269.92,2173.08,2084.47,1977.90,1881.65])
+        l0freqmod = l0freq%(seis.deltanu/u.uHz)
+        #print(l0freqmod)
+
+### Plot modes on power spectrum
+        plt.figure()
+        plt.plot(time,flux)
+        plt.plot(freq,pssm,'black')     
+        nu_max = plt.axvline(x=vmax,linewidth=5, color='yellow',alpha=0.5,label='nu_max') #vmaxline -- note vmax more accurate than numax
+
+        for l1freaks in l1freq:
+            l1 =plt.axvline(x=l1freaks,linewidth=1.1,color='fuchsia',ls='--',label='l1')
+        for l2freaks in l2freq:
+            l2 = plt.axvline(x=l2freaks,linewidth=1.1,color='springgreen',ls='--',label='l2')
+        for l0freaks in l0freq:
+            l0 = plt.axvline(x=l0freaks,linewidth=1.1,color='dodgerblue',ls='--',label='l0')
+        plt.legend(handles=(nu_max,l1,l2,l0))
+
+        plt.xlabel('Frequency ($\mu$Hz)') 
+        plt.ylabel('Power Density')
+        plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax])
+
+#### Plot Echelle
+        seis.plot_echelle(deltanu=seis.deltanu,numax=numax,smooth_filter_width=3.,scale='log',cmap='gray')
+        plt.plot(l1freqmod,l1freq,'-ok',color='fuchsia')
+        plt.plot(l2freqmod,l2freq,'-ok',color='springgreen')
+        plt.plot(l0freqmod,l0freq,'-ok',color='dodgerblue')
+        l1ech = mlines.Line2D([], [], color='fuchsia', marker='.',
+                          markersize=10, label='l = 1')
+        l2ech = mlines.Line2D([], [], color='springgreen', marker='.',
+                          markersize=10, label='l = 2')
+        l0ech = mlines.Line2D([], [], color='dodgerblue', marker='.',
+                          markersize=10, label='l = 0')
+        plt.legend(handles=(l1ech,l2ech,l0ech))
+        plt.show()
+        # x range goes to vmax +- 0.5 vmaxm
+        
+        msun = 1.9891 * (10**30) #kg
+        deltanusun = 135 * (10**-6) #Hz
+        numaxsun = vmaxs * (10**-6) #Hz
+        teffsun = tsun #K
+        rsun = 6.957 * (10**8) #m
+
+        teffstar = teff #K
+        radstar = rad * rsun #m
+        deltanustar = 97.73 * (10**-6) #Hz <--- gna have to changethis
+        #print(deltanustar)
+        numaxstar = vmax * (10**-6)
+        #print(numaxstar)
+        
+        mstarnum = msun * (numaxstar**3) * (deltanusun**4) * (teffstar**1.5)
+        mstardenom = (numaxsun**3) * (deltanustar**4) * (teffsun**1.5)
+        mstar = mstarnum/mstardenom ##kg
+
+        mstarsol = mstar/msun #in Msun
+
+        print("mstar = ",mstar, " kg")
+        print("mstar = ",mstarsol, " m_sun")
+        #)#*tsun#*(vmaxs*(10**-6))
+
    #seis.plot_echelle(deltanu=seis.deltanu,numax=numax,smooth_filter_width=3.,scale='log',cmap='viridis')
         #from pprint import pprint 
         #pprint(seis)
 
-        
+        #integer rounding #nrows, cols
         
         input(':')
 
