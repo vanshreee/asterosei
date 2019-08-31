@@ -11,6 +11,7 @@ from scipy.signal import savgol_filter as savgol
 from astropy import units as u
 import lightkurve as lkk
 import matplotlib.lines as mlines
+from echelle import plot_echelle
 
 
 # Want to debug? Use pdb.set_trace() 
@@ -268,53 +269,145 @@ if __name__ == '__main__':
             #plt.pause(0.01)
             
         ##l=1
-        l1freq =[2418.48,2316.36,2220.47,2122.40,2024.33,1925.68,1829.04,1733.90,1550.97]
+        l1freq =np.array([2316.36,2220.47,2122.40,2024.33,1925.68,1829.04])
+        #l1freqog = np.array([2418.48,2316.36,2220.47,2122.40,2024.33,1925.68,1829.04,1733.90,1550.97])
         l1freqmod = l1freq%(seis.deltanu/u.uHz)
         #print(l1freqmod)
         
         ##l=2
-        l2freq = np.array([2264.08,2166.27,2076.13,1971.82,1873.42])
+        l2freq = np.array([2264.08,2166.27,1971.82,1873.42])
+        #l2freqog = np.array([2264.08,2166.27,2076.13,1971.82,1873.42])
         l2freqmod = l2freq%(seis.deltanu/u.uHz)
         #print(l2freqmod)
 
         ##l=0
-        l0freq = np.array([2269.92,2173.08,2084.47,1977.90,1881.65])
+        l0freq = np.array([2269.92,2173.08,2076.13,1977.90,1881.65])
+        #l0freqog = np.array([2269.92,2173.08,2084.47,1977.90,1881.65])
         l0freqmod = l0freq%(seis.deltanu/u.uHz)
         #print(l0freqmod)
 
 ### Plot modes on power spectrum
-        plt.figure()
-        plt.plot(time,flux)
-        plt.plot(freq,pssm,'black')     
-        nu_max = plt.axvline(x=vmax,linewidth=5, color='yellow',alpha=0.5,label='nu_max') #vmaxline -- note vmax more accurate than numax
+        # plt.figure()
+        # plt.plot(time,flux)
+        # plt.plot(freq,pssm,'black')
+        # #plt.xlim([1750,2400])
+        # plt.ylim([-0.5,21])
+        # nu_max = plt.axvline(x=vmax,linewidth=5, color='yellow',alpha=0.5,label='nu_max') #vmaxline -- note vmax more accurate than numax
 
-        for l1freaks in l1freq:
-            l1 =plt.axvline(x=l1freaks,linewidth=1.1,color='fuchsia',ls='--',label='l1')
-        for l2freaks in l2freq:
-            l2 = plt.axvline(x=l2freaks,linewidth=1.1,color='springgreen',ls='--',label='l2')
-        for l0freaks in l0freq:
-            l0 = plt.axvline(x=l0freaks,linewidth=1.1,color='dodgerblue',ls='--',label='l0')
-        plt.legend(handles=(nu_max,l1,l2,l0))
+        # for l1freaks in l1freq:
+        #     l1 =plt.axvline(x=l1freaks,linewidth=1.1,color='fuchsia',ls='--',label='l1')
+        # for l2freaks in l2freq:
+        #     l2 = plt.axvline(x=l2freaks,linewidth=1.1,color='springgreen',ls='--',label='l2')
+        # for l0freaks in l0freq:
+        #     l0 = plt.axvline(x=l0freaks,linewidth=1.1,color='dodgerblue',ls='--',label='l0')
+        # plt.legend(handles=(nu_max,l1,l2,l0))
 
-        plt.xlabel('Frequency ($\mu$Hz)') 
-        plt.ylabel('Power Density')
-        plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax])
+        # plt.xlabel('Frequency ($\mu$Hz)') 
+        # plt.ylabel('Power Density')
+        # plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax])
 
 #### Plot Echelle
-        seis.plot_echelle(deltanu=seis.deltanu,numax=numax,smooth_filter_width=3.,scale='log',cmap='gray')
-        plt.plot(l1freqmod,l1freq,'-ok',color='fuchsia')
-        plt.plot(l2freqmod,l2freq,'-ok',color='springgreen')
-        plt.plot(l0freqmod,l0freq,'-ok',color='dodgerblue')
-        l1ech = mlines.Line2D([], [], color='fuchsia', marker='.',
-                          markersize=10, label='l = 1')
-        l2ech = mlines.Line2D([], [], color='springgreen', marker='.',
-                          markersize=10, label='l = 2')
-        l0ech = mlines.Line2D([], [], color='dodgerblue', marker='.',
-                          markersize=10, label='l = 0')
-        plt.legend(handles=(l1ech,l2ech,l0ech))
-        plt.show()
-        # x range goes to vmax +- 0.5 vmaxm
+        # seis.plot_echelle(deltanu=seis.deltanu,numax=numax,smooth_filter_width=3.,scale='log',cmap='gray')
+        # plt.plot(l1freqmod,l1freq,'-ok',color='fuchsia')
+        # plt.plot(l2freqmod,l2freq,'-ok',color='springgreen')
+        # plt.plot(l0freqmod,l0freq,'-ok',color='dodgerblue')
+        # l1ech = mlines.Line2D([], [], color='fuchsia', marker='.',
+        #                   markersize=10, label='l = 1')
+        # l2ech = mlines.Line2D([], [], color='springgreen', marker='.',
+        #                   markersize=10, label='l = 2')
+        # l0ech = mlines.Line2D([], [], color='dodgerblue', marker='.',
+        #                   markersize=10, label='l = 0')
+        # plt.legend(handles=(l1ech,l2ech,l0ech))
+        # plt.show()
+
+        ###
+        #print(freq) 
+        # freqmodech = freq%(seis.deltanu/u.uHz)
+        # plt.figure()
+        # plt.scatter(freqmodech,freq)
+        # plt.yscale('log')#,cmap='viridis')
+        #plt.imshow
         
+
+### danhey ech
+        #plt.figure()
+        ## plot_echelle(freq,pssm,97.73,fmin=1700,fmax=2500)
+        from echelle import echelle
+        X,Y,Z = echelle(freq,pssm,97.73) ## X = freqmod, Y= pssm, Z=freq        
+        
+        #plt.ylim([1600,2400])
+        
+        # plt.plot(l1freqmod,l1freq,'-ok',color='fuchsia')
+        # plt.plot(l2freqmod,l2freq,'-ok',color='springgreen')
+        # plt.plot(l0freqmod,l0freq,'-ok',color='dodgerblue') 
+        # l1ech = mlines.Line2D([], [], color='fuchsia', marker='.',
+        #                   markersize=2, label='l = 1')
+        # l2ech = mlines.Line2D([], [], color='springgreen', marker='.',
+        #                   markersize=2, label='l = 2')
+        # l0ech = mlines.Line2D([], [], color='dodgerblue', marker='.',
+        #                   markersize=2, label='l = 0')
+        # plt.legend(handles=(l1ech,l2ech,l0ech))
+        # plt.show()
+        #pdb.set_trace()
+        plt.plot(X, np.sum(Z, axis=0), 'k', linewidth=0.7)
+        plt.axvline(x=np.mean(l1freqmod),linewidth=8, color='fuchsia',alpha=0.4,label='l1')
+        plt.axvline(x=np.mean(l2freqmod),linewidth=8, color='springgreen',alpha=0.4,label='l2')
+        plt.axvline(x=np.mean(l0freqmod),linewidth=8, color='dodgerblue',alpha=0.4,label='l0')
+        l1ech = mlines.Line2D([], [], color='fuchsia', marker='s',markersize=8,alpha=0.4, label='l = 1')
+        l2ech = mlines.Line2D([], [], color='springgreen', marker='s',markersize=8,alpha=0.4, label='l = 2')
+        l0ech = mlines.Line2D([], [], color='dodgerblue', marker='s',markersize=8,alpha=0.4, label='l = 0')
+        plt.legend(handles=(l1ech,l2ech,l0ech))
+        plt.xlabel('Frequency mod 97.73')
+        plt.ylabel('Relative Power') #Ampl in danhey code
+
+# # fig, axes = plt.subplots(2,1, figsize=[10,10])
+
+# # dnu = 7
+
+# # ax = axes[0]
+# # echelle.plot_echelle(pg.frequency.value, np.sqrt(pg.power.value), dnu, fmin=10, fmax=70, ax=ax, cmap='Blues')
+# # ax.set_xlabel('')
+# # ax.set_xticks([])
+
+# # ax = axes[1]
+# # X, Y, Z = echelle.echelle(pg.frequency.value, pg.power.value, dnu)
+# # ax.plot(X, np.sum(Z, axis=0), 'k', linewidth=0.7)
+# # ax.set_xlabel('Frequency mod 5')
+# # ax.set_ylabel('Amplitude')
+# # ax.set_xlim(X[0], X[-1])
+# # ax.set_ylim(0, None)
+
+# # plt.subplots_adjust(hspace=0.)
+
+        # redfreq = freq.flatten()
+        #redfreqmod = redfreq%97.73
+        #freqmod=freq%97.73
+        # l1y1 =l1freqmod/10.0
+        # l2y2 =l2freqmod/10.0
+        # l0y0 =l0freqmod/10.0
+        # #plt.plot(freqmod,amp)
+        # plt.plot(freqmod,pssm-amp)
+        # plt.plot(l1freqmod,l1y1,'-ok',color='fuchsia')
+        # plt.plot(l2freqmod,l2y2,'-ok',color='springgreen')
+        # plt.plot(l0freqmod,l0y0,'-ok',color='dodgerblue')
+        # # plt.legend(handles=(l1ech,l2ech,l0ech))
+        # plt.show()
+
+        
+
+        #imagine.flatten()
+        #print(freqmod)
+        #print((np.sum(freq,axis=0)).shape())
+        #print((np.sum(freq),shape()))
+        #plt.plot(freqmod,np.sum(freq,axis=0),'k')
+        #from echelle import echelle
+       # X, Y, Z = echelle(freq, pssm, 97.73)
+        #Yf = Y.flatten()
+        #imagine = plt.contourf(X, Y, Z)
+        #imagine.flatten()
+             #    pssm)
+
+## calc mass
         msun = 1.9891 * (10**30) #kg
         deltanusun = 135 * (10**-6) #Hz
         numaxsun = vmaxs * (10**-6) #Hz
@@ -323,7 +416,7 @@ if __name__ == '__main__':
 
         teffstar = teff #K
         radstar = rad * rsun #m
-        deltanustar = 97.73 * (10**-6) #Hz <--- gna have to changethis
+        deltanustar = (seis.deltanu/u.uHz) * (10**-6) #Hz
         #print(deltanustar)
         numaxstar = vmax * (10**-6)
         #print(numaxstar)
@@ -338,6 +431,9 @@ if __name__ == '__main__':
         print("mstar = ",mstarsol, " m_sun")
         #)#*tsun#*(vmaxs*(10**-6))
 
+
+
+        ###### binrubbish
    #seis.plot_echelle(deltanu=seis.deltanu,numax=numax,smooth_filter_width=3.,scale='log',cmap='viridis')
         #from pprint import pprint 
         #pprint(seis)
@@ -374,10 +470,22 @@ if __name__ == '__main__':
         ###good ask qs about the physics behind it
 
 
-        ## look at power spectrum which peaks are significant
-        ## identify peaks
-        ## decrease smoothening
-        ## echelle flatten get dv02
+        ## look at power spectrum which peaks are significant DONE
+        ## identify peaks DONE
+        ## decrease smoothening DONE
+        ## echelle flatten get dv02 WAITING ON LIGHTKURVE PPL 
 
         # coding questions
         ## good 
+
+        ## measure radius
+        ## dan hey freq range <-
+        ## plotting issue shifted echeel
+
+        # lorentizaian profile
+        ## gaussian has a width of sigman, and a mean.
+        ## lorientiazian also have a freq and a width and height
+        ## lorentizian -- osc exciticed by convection, dame out - lorentxian diecribes it
+        ## gamma prop 1/mode  lifetime
+        ## short mode lifetimes, narraw peak
+        
