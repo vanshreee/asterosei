@@ -12,19 +12,20 @@ from astropy import units as u
 import lightkurve as lkk
 import matplotlib.lines as mlines
 from echelle import plot_echelle
+from echelle import echelle
 
 
 # Want to debug? Use pdb.set_trace() 
 
 #Action Items:
         ## identify delta v and make echelle DONE
-        ## make echelle better - 
-        ## plot 1D echelle diagram
-        ## plot on Jen's graphs 
+        ## make echelle better - DONE
+        ## plot 1D echelle diagram DONE
+        ## plot on Jen's graphs DONE
         ## tell if it is l=0 etc.DOING 
         ## make the echelle diagram DONE
-        ## identify peaks (might need to decrease smoothening)
-        ## do the asteroseismic age for the star using the small seperations (not vmax)
+        ## identify peaks (might need to decrease smoothening)DONE
+        ## do the asteroseismic age for the star using the small seperations (not vmax) DONE
         ## look through all again and identify good ones
         
 # subroutine to perform rough sigma clipping
@@ -144,11 +145,11 @@ if __name__ == '__main__':
 
         # plot the light curve
         plt.ion()
-        # plt.clf()
-        # plt.subplot(3,1,1)
-        # plt.plot(time,flux)
-        # plt.xlabel('Time (Days)')
-        # plt.ylabel('Flux (counts)')
+        plt.clf()
+        plt.subplot(3,1,1)
+        plt.plot(time,flux)
+        plt.xlabel('Time (Days)')
+        plt.ylabel('Flux (counts)')
 
         # sigma-clip outliers from the light curve and overplot it
         res=sigclip(time,flux,50,3)
@@ -192,24 +193,29 @@ if __name__ == '__main__':
             intboxsize = intboxsize+1
         smoothed_flux = savgol(flux,intboxsize,1,mode='mirror')
             # overplot this smoothed version, and then divide the light curve through it
-        #plt.plot(time,smoothed_flux)
-        #plt.title("kicid is "+ str(int(kicid)) +" & numax is "+ str(int(vmax))+" $\mu$Hz")
+        plt.plot(time,smoothed_flux)
+        plt.title("kicid is "+ str(int(kicid)) +" & numax is "+ str(int(vmax))+" $\mu$Hz")
 
         flux=flux/(smoothed_flux)
 
-            # plot the filtered light curve
-        # plt.subplot(3,1,2)
-        # plt.plot(time,flux)
-        # plt.xlabel('Time (Days)')
-        # plt.ylabel('Relative flux')
+        #plot the filtered light curve
+        plt.subplot(3,1,2)
+        plt.plot(time,flux)
+        plt.xlabel('Time (Days)')
+        plt.ylabel('Relative flux')
 
             # now let's calculate the fourier transform. the nyquist frequency is:
-        nyq=1./(1./60./24.)
+        nyq=1./(2./60./24.) ##in cycles per day
+        print(nyq)
             ## expected to be 40 microHz set an appropriate filter
             ## red giant stars long cadence not short cadenc 
 
             # FT magic
-        freq, amp = LombScargle(time,flux).autopower(method='fast',samples_per_peak=50,maximum_frequency=nyq)#10
+        freq, amp = LombScargle(time,flux).autopower(method='fast',samples_per_peak=50,maximum_frequency=nyq)#10 #change it to 1 to prevent oversampling #was 50 for nice PS with modes
+        #8300 microhz in cycles per day
+        # 700 cycles per day
+        
+        ## extend the the ranges
 
             # unit conversions
         freq = 1000.*freq/86.4
@@ -218,93 +224,124 @@ if __name__ == '__main__':
         gauss_kernel = Gaussian1DKernel(26)
         pssm = convolve(amp, gauss_kernel)
 
-        #     # plot the power spectrum log scale
-        # plt.subplot(3,2,5)
-        # plt.loglog(freq,amp)
-        # plt.loglog(freq,pssm)
-        # plt.axvline(x=vmax,linewidth=2, color='r')
-        # plt.xlabel('Frequency ($\mu$Hz)')
-        # plt.ylabel('Power Density')
-        # plt.xlim([100,8000]) ## plot all 10-8000
-        # plt.tight_layout()
+            # plot the power spectrum log scale
+        plt.subplot(3,2,5)
+        plt.loglog(freq,amp)
+        plt.loglog(freq,pssm)
+        plt.axvline(x=vmax,linewidth=2, color='r')
+        plt.xlabel('Frequency ($\mu$Hz)')
+        plt.ylabel('Power Density')
+        plt.xlim([100,(nyq/0.0864)]) ## plot all 10-8000
+        plt.tight_layout()
 
-        # #data artifact 300-400 microhz
-        #     # plot the power spectrum regular ### low freq no point in plotting. 
-        # plt.subplot(3,2,6)
-        # plt.plot(freq,amp) 
-        # plt.plot(freq,pssm)
-        # plt.axvline(x=vmax,linewidth=2, color='r')
-        # plt.xlabel('Frequency ($\mu$Hz)')
-        # plt.ylabel('Power Density')
-        # plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax])
+        #data artifact 300-400 microhz
+            # plot the power spectrum regular ### low freq no point in plotting. 
+        plt.subplot(3,2,6)
+        plt.plot(freq,amp) 
+        plt.plot(freq,pssm)
+        plt.axvline(x=vmax,linewidth=2, color='r')
+        plt.xlabel('Frequency ($\mu$Hz)')
+        plt.ylabel('Power Density')
+        plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax])
         
-        # plt.tight_layout()
-        
+        plt.tight_layout()
+
+        #pdb.set_trace()
+
+        #print(freq)
+        #print(pssm)
+
+        #np.savetxt('/Users/vanshree/asterosei/Background/data/KIC11029516.txt',np.c_[freq,amp])
+
         # save the output as png
-        #plt.savefig(str(input("Is it good(g) or bad(b)?"))+'_'+str(int(kicid))+'.png',dpi=200)
+        #plt.savefig('2ndpass'+str(input("Is it good(g) or bad(b)?"))+'_'+str(int(kicid))+'.png',dpi=200)
+
+        ##
+        plt.figure()
+        plt.plot(time,flux)
+        plt.xlabel('Time (Days)')
+        plt.ylabel('Relative flux')
+        plt.tight_layout()
+
+        ## Plot FT log scale seperately for Backgrounf Params
+        plt.figure()
+        plt.loglog(freq,amp)
+        #plt.loglog(freq,pssm)
+        plt.axvline(x=vmax,linewidth=2, color='r')
+        plt.xlabel('Frequency ($\mu$Hz)')
+        plt.ylabel('Power Density')
+        plt.xlim([10,(nyq*10**6/(24*60*60))]) ## plot all 10-8000
+        plt.tight_layout()
+
+        # convert cycles/day to microhz
+        
+        # cycles/(24*60*60) = Hz
+        # Hz * 10^-6 = microHz
+        
+        
 
 #_______________________________________________________________________________
 #                             Echelle
 #_______________________________________________________________________________
-   #Generate lightkurve 
-        lk = lkk.LightCurve(time=time,flux=flux)
+   # #Generate lightkurve 
+   #      lk = lkk.LightCurve(time=time,flux=flux)
        
-   #Do Fourier transform
-        pg = lk.to_periodogram(method='lombscargle',normalization='psd',minimum_frequency=1000,maximum_frequency=3000)
+   # #Do Fourier transform
+   #      pg = lk.to_periodogram(method='lombscargle',normalization='psd',minimum_frequency=1000,maximum_frequency=3000)
        
-   #Get numax, seis  
-        snr = pg.flatten()
-        seis = snr.to_seismology()
-        numax = seis.estimate_numax()
+   # # #Get numax, seis  
+   #      snr = pg.flatten()
+   #      seis = snr.to_seismology()
+   #      numax = seis.estimate_numax()
        
-   #Change deltanu
-        adelenu= np.float64(0.9)#*u.uHz #
-        #ax = plt.figure()#.add_suplot(111)
-        #for adelenu in np.arange(0.8,1.1,0.02):
-        #adelenu=np.float64(input("add or subtract how much from dnu?"))*u.uHz
-        seis.deltanu=seis.estimate_deltanu()+(adelenu*u.uHz)
-            #seis.plot_echelle(deltanu=seis.deltanu,numax=numax,smooth_filter_width=3.,scale='log',cmap='viridis')
-        #plt.savefig('final_Echelle'+str(seis.deltanu)+'_'+'.png',dpi=200)
-            #plt.clear()
-            #plt.pause(0.01)
+   # #Change deltanu
+   #      adelenu= np.float64(0.9)#*u.uHz #
+   #      #ax = plt.figure()#.add_suplot(111)
+   #      #for adelenu in np.arange(0.8,1.1,0.02):
+   #      #adelenu=np.float64(input("add or subtract how much from dnu?"))*u.uHz
+   #      seis.deltanu=seis.estimate_deltanu()+(adelenu*u.uHz)
+   #          #seis.plot_echelle(deltanu=seis.deltanu,numax=numax,smooth_filter_width=3.,scale='log',cmap='viridis')
+   #      #plt.savefig('final_Echelle'+str(seis.deltanu)+'_'+'.png',dpi=200)
+   #          #plt.clear()
+   #          #plt.pause(0.01)
             
         ##l=1
         l1freq =np.array([2316.36,2220.47,2122.40,2024.33,1925.68,1829.04])
         #l1freqog = np.array([2418.48,2316.36,2220.47,2122.40,2024.33,1925.68,1829.04,1733.90,1550.97])
-        l1freqmod = l1freq%(seis.deltanu/u.uHz)
+        l1freqmod = l1freq%(97.73)
         #print(l1freqmod)
         
         ##l=2
         l2freq = np.array([2264.08,2166.27,1971.82,1873.42])
         #l2freqog = np.array([2264.08,2166.27,2076.13,1971.82,1873.42])
-        l2freqmod = l2freq%(seis.deltanu/u.uHz)
+        l2freqmod = l2freq%97.73#(deltanu/u.uHz)
         #print(l2freqmod)
 
         ##l=0
         l0freq = np.array([2269.92,2173.08,2076.13,1977.90,1881.65])
         #l0freqog = np.array([2269.92,2173.08,2084.47,1977.90,1881.65])
-        l0freqmod = l0freq%(seis.deltanu/u.uHz)
+        l0freqmod = l0freq%97.73#(deltanu/u.uHz)
         #print(l0freqmod)
 
 ### Plot modes on power spectrum
-        # plt.figure()
-        # plt.plot(time,flux)
-        # plt.plot(freq,pssm,'black')
-        # #plt.xlim([1750,2400])
-        # plt.ylim([-0.5,21])
-        # nu_max = plt.axvline(x=vmax,linewidth=5, color='yellow',alpha=0.5,label='nu_max') #vmaxline -- note vmax more accurate than numax
+        plt.figure()
+        plt.plot(time,flux)
+        plt.plot(freq,pssm,'black')
+        #plt.xlim([1750,2400])
+        plt.ylim([-0.5,21])
+        nu_max = plt.axvline(x=vmax,linewidth=5, color='yellow',alpha=0.5,label='nu_max') #vmaxline -- note vmax more accurate than numax
 
-        # for l1freaks in l1freq:
-        #     l1 =plt.axvline(x=l1freaks,linewidth=1.1,color='fuchsia',ls='--',label='l1')
-        # for l2freaks in l2freq:
-        #     l2 = plt.axvline(x=l2freaks,linewidth=1.1,color='springgreen',ls='--',label='l2')
-        # for l0freaks in l0freq:
-        #     l0 = plt.axvline(x=l0freaks,linewidth=1.1,color='dodgerblue',ls='--',label='l0')
-        # plt.legend(handles=(nu_max,l1,l2,l0))
+        for l1freaks in l1freq:
+            l1 =plt.axvline(x=l1freaks,linewidth=1.1,color='fuchsia',ls='--',label='l1')
+        for l2freaks in l2freq:
+            l2 = plt.axvline(x=l2freaks,linewidth=1.1,color='springgreen',ls='--',label='l2')
+        for l0freaks in l0freq:
+            l0 = plt.axvline(x=l0freaks,linewidth=1.1,color='dodgerblue',ls='--',label='l0')
+        plt.legend(handles=(nu_max,l1,l2,l0))
 
-        # plt.xlabel('Frequency ($\mu$Hz)') 
-        # plt.ylabel('Power Density')
-        # plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax])
+        plt.xlabel('Frequency ($\mu$Hz)') 
+        plt.ylabel('Power Density')
+        plt.xlim([vmax-0.5*vmax,vmax+0.5*vmax])
 
 #### Plot Echelle
         # seis.plot_echelle(deltanu=seis.deltanu,numax=numax,smooth_filter_width=3.,scale='log',cmap='gray')
@@ -330,25 +367,24 @@ if __name__ == '__main__':
         
 
 ### danhey ech
-        #plt.figure()
-        ## plot_echelle(freq,pssm,97.73,fmin=1700,fmax=2500)
-        from echelle import echelle
-        X,Y,Z = echelle(freq,pssm,97.73) ## X = freqmod, Y= pssm, Z=freq        
+        plt.figure()
+        plot_echelle(freq,pssm,97.73,fmin=1700,fmax=2500)
         
-        #plt.ylim([1600,2400])
+        X,Y,Z = echelle(freq,pssm,97.73,fmin=1850,fmax=2250) ## X = freqmod, Y= pssm, Z=freq        
+        plt.plot(l1freqmod,l1freq,'-ok',color='fuchsia')
+        plt.plot(l2freqmod,l2freq,'-ok',color='springgreen')
+        plt.plot(l0freqmod,l0freq,'-ok',color='dodgerblue') 
+        l1ech = mlines.Line2D([], [], color='fuchsia', marker='.',
+                          markersize=2, label='l = 1')
+        l2ech = mlines.Line2D([], [], color='springgreen', marker='.',
+                          markersize=2, label='l = 2')
+        l0ech = mlines.Line2D([], [], color='dodgerblue', marker='.',
+                          markersize=2, label='l = 0')
+        plt.legend(handles=(l1ech,l2ech,l0ech))
+        plt.show()
         
-        # plt.plot(l1freqmod,l1freq,'-ok',color='fuchsia')
-        # plt.plot(l2freqmod,l2freq,'-ok',color='springgreen')
-        # plt.plot(l0freqmod,l0freq,'-ok',color='dodgerblue') 
-        # l1ech = mlines.Line2D([], [], color='fuchsia', marker='.',
-        #                   markersize=2, label='l = 1')
-        # l2ech = mlines.Line2D([], [], color='springgreen', marker='.',
-        #                   markersize=2, label='l = 2')
-        # l0ech = mlines.Line2D([], [], color='dodgerblue', marker='.',
-        #                   markersize=2, label='l = 0')
-        # plt.legend(handles=(l1ech,l2ech,l0ech))
-        # plt.show()
         #pdb.set_trace()
+        plt.figure()
         plt.plot(X, np.sum(Z, axis=0), 'k', linewidth=0.7)
         plt.axvline(x=np.mean(l1freqmod),linewidth=8, color='fuchsia',alpha=0.4,label='l1')
         plt.axvline(x=np.mean(l2freqmod),linewidth=8, color='springgreen',alpha=0.4,label='l2')
@@ -358,7 +394,9 @@ if __name__ == '__main__':
         l0ech = mlines.Line2D([], [], color='dodgerblue', marker='s',markersize=8,alpha=0.4, label='l = 0')
         plt.legend(handles=(l1ech,l2ech,l0ech))
         plt.xlabel('Frequency mod 97.73')
-        plt.ylabel('Relative Power') #Ampl in danhey code
+        plt.ylabel('Relative Power')
+        plt.show()
+        ##Ampl in danhey code
 
 # # fig, axes = plt.subplots(2,1, figsize=[10,10])
 
@@ -416,7 +454,7 @@ if __name__ == '__main__':
 
         teffstar = teff #K
         radstar = rad * rsun #m
-        deltanustar = (seis.deltanu/u.uHz) * (10**-6) #Hz
+        deltanustar = (97.73) * (10**-6) #Hz
         #print(deltanustar)
         numaxstar = vmax * (10**-6)
         #print(numaxstar)
@@ -431,6 +469,9 @@ if __name__ == '__main__':
         print("mstar = ",mstarsol, " m_sun")
         #)#*tsun#*(vmaxs*(10**-6))
 
+        #pdb.set_trace()
+        #np.savetxt('/Users/vanshree/asterosei/Background/data/KIC11029516.txt',np.c_[freq,pssm])#[4414:100839],pssm[4414:100839]])#sampling5[freq[8826:201677],pssm[8826:201677]])#sampling1[freq[847:20169],pssm[847:20169]])#[freq[44120:1008380],pssm[44120:1008380]])#,delimiter='\t',newline='\n')
+#[13000:1025000]])#[45000:1025000]]) #[44120:1008380]
 
 
         ###### binrubbish
@@ -441,6 +482,33 @@ if __name__ == '__main__':
         #integer rounding #nrows, cols
         
         input(':')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
 
 ###### meeting notes ##################
         ###
